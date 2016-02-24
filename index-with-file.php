@@ -20,6 +20,8 @@
 	
 	foreach($locations as $location){	
 		$dir = "html/";
+		$list = array();
+		
 		if(!preg_match(",", $location)){
 			if(!empty($_REQUEST["file"])){
 				$location = $location.",".$_REQUEST["file"];
