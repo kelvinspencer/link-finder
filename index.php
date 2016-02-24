@@ -1,16 +1,55 @@
 <?php
 	$domain = "http://www.yellowpages.com";
 	$dir = "html/";
-	$home = $dir."home.html";
-	$page = $home;
+	
 	$page_count = 1;
-	for($page_count = 1; $page_count < 10; $page_count++){
+	
+	$location = $_REQUEST["location"];
+	$encoded_location = urlencode($location);
+	if(empty($encoded_location)){
+		echo "enter location ?location=[location]";
+		exit;	
+	}
+	
+	$location_clean = preg_replace('/[^a-zA-Z0-9\s]/', '', strtolower($location)); 
+	$location_clean = preg_replace('!\s+!', '-', $location_clean); 
+
+	$search_kw = urlencode($_REQUEST["search"]);
+	$search_kw_clean = preg_replace('/[^a-zA-Z0-9\s]/', '', strtolower($search_kw)); 
+	$search_kw_clean = preg_replace('!\s+!', '-', $search_kw_clean); 
+	
+	$search_kw = urlencode($_REQUEST["search"]);
+	$search_kw = urlencode($_REQUEST["search"]);
+	
+	if(!file_exists($dir.$location_clean)){
+		mkdir($dir.$location_clean);
+		chmod($dir.$location_clean, 0777);
+		if(!file_exists($dir.$location_clean."/".$search_kw_clean)){
+			mkdir($dir.$location_clean."/".$search_kw_clean);
+			$dir = $dir.$location_clean."/".$search_kw_clean."/";
+			chmod($dir, 0777);
+		}
+	} else {
+		$dir = $dir.$location_clean."/";
+		$dir = $dir.$location_clean."/".$search_kw_clean."/";
+	}
+	
+	$home = $dir."home.html";echo $home;
+	$page = $home;
+	
+	if(empty($_REQUEST["search"])){
+		$_REQUEST["search"] = "discount store";
+	}
+		
+	
+	
+	for($page_count = 1; $page_count <= 20; $page_count++){
 		if($page_count > 1){
-			//http://www.yellowpages.com/search?search_terms=discount%20stores%2C%20dallas%20%2Ctx&geo_location_terms=75006&page=2
+			//http://www.yellowpages.com/search?search_terms=discount%20store&geo_location_terms=75006&page=2
 			$page = $dir."page".$page_count.".html";
 			//$domain."/search?search_terms=discount%20stores%2C%20dallas%20%2Ctx&geo_location_terms=75006"
 			if(!file_exists($page)){
-				$data = file_get_contents($domain."/search?search_terms=discount%20stores%2C%20dallas%20%2Ctx&geo_location_terms=75006&page=".$page_count);
+				$data = file_get_contents($domain."/search?search_terms=$search_kw&geo_location_terms=$encoded_location&page=".$page_count);
 				$myfile = fopen($page, "w+") or die("Unable to open file!");
 				fwrite($myfile, $data);
 				fclose($myfile);	
@@ -22,7 +61,7 @@
 			$page = $home;
 			//$domain."/search?search_terms=discount%20stores%2C%20dallas%20%2Ctx&geo_location_terms=75006"
 			if(!file_exists($page)){
-				$data = file_get_contents($domain."/search?search_terms=discount%20stores%2C%20dallas%20%2Ctx&geo_location_terms=75006");
+				$data = file_get_contents($domain."/search?search_terms=$search_kw&geo_location_terms=$encoded_location");
 				$myfile = fopen($page, "w+") or die("Unable to open file!");
 				fwrite($myfile, $data);
 				fclose($myfile);	
@@ -132,8 +171,8 @@
 		
 	}
 	
-	unlink("list.csv");
-	$myfile = fopen("list.csv", "w+") or die("Unable to open file!");
+	@unlink("list-$location_clean-$search_kw_clean.csv");
+	$myfile = fopen("list-$location_clean-$search_kw_clean.csv", "w+") or die("Unable to open file!");
 	fwrite($myfile, implode("|", $list));
 	fclose($myfile);
 	//count($stores);
