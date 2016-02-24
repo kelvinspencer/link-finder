@@ -22,8 +22,8 @@
 		
 	foreach($stores as $store){
 		$value=preg_match_all('/<a href=\"(.*?)\"/s',$store,$links);
-		
+		print_r($links);
 	}
-	echo $data;
+	//echo $data;
 	//count($stores);
 ?>
